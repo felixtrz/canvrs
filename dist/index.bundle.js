@@ -2212,12 +2212,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Core": () => (/* binding */ Core)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var _GameObject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./GameObject */ "./node_modules/elixr/src/GameObject.js");
-/* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
-/* harmony import */ var three_examples_jsm_webxr_VRButton_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three/examples/jsm/webxr/VRButton.js */ "./node_modules/three/examples/jsm/webxr/VRButton.js");
-/* harmony import */ var ecsy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ecsy */ "./node_modules/ecsy/src/index.js");
-/* harmony import */ var three_examples_jsm_webxr_XRControllerModelFactory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! three/examples/jsm/webxr/XRControllerModelFactory */ "./node_modules/three/examples/jsm/webxr/XRControllerModelFactory.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var _utils_ARButton__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/ARButton */ "./node_modules/elixr/src/utils/ARButton.js");
+/* harmony import */ var _GameObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameObject */ "./node_modules/elixr/src/GameObject.js");
+/* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
+/* harmony import */ var _utils_VRButton__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils/VRButton */ "./node_modules/elixr/src/utils/VRButton.js");
+/* harmony import */ var ecsy__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ecsy */ "./node_modules/ecsy/src/index.js");
+/* harmony import */ var three_examples_jsm_webxr_XRControllerModelFactory__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! three/examples/jsm/webxr/XRControllerModelFactory */ "./node_modules/three/examples/jsm/webxr/XRControllerModelFactory.js");
+
 
 
 
@@ -2228,15 +2230,17 @@ __webpack_require__.r(__webpack_exports__);
 
 class Core {
 	constructor(sceneContainer, ecsyOptions = {}) {
-		this._ecsyWorld = new ecsy__WEBPACK_IMPORTED_MODULE_3__.World(ecsyOptions);
+		this._ecsyWorld = new ecsy__WEBPACK_IMPORTED_MODULE_4__.World(ecsyOptions);
 		this._ecsyWorld.core = this;
 
 		this._createThreeScene();
 
 		sceneContainer.appendChild(this._renderer.domElement);
-		document.body.appendChild(three_examples_jsm_webxr_VRButton_js__WEBPACK_IMPORTED_MODULE_2__.VRButton.createButton(this._renderer));
 
-		this._playerSpace = new three__WEBPACK_IMPORTED_MODULE_5__.Group();
+		this._vrButton = _utils_VRButton__WEBPACK_IMPORTED_MODULE_3__.VRButton.createButton(this._renderer);
+		this._arButton = _utils_ARButton__WEBPACK_IMPORTED_MODULE_0__.ARButton.createButton(this._renderer);
+
+		this._playerSpace = new three__WEBPACK_IMPORTED_MODULE_6__.Group();
 		this._playerSpace.add(this._camera);
 		this._scene.add(this._playerSpace);
 		this._controllers = {};
@@ -2247,20 +2251,21 @@ class Core {
 	}
 
 	_createThreeScene() {
-		this._scene = new three__WEBPACK_IMPORTED_MODULE_5__.Scene();
-		this._camera = new three__WEBPACK_IMPORTED_MODULE_5__.PerspectiveCamera(
+		this._scene = new three__WEBPACK_IMPORTED_MODULE_6__.Scene();
+		this._camera = new three__WEBPACK_IMPORTED_MODULE_6__.PerspectiveCamera(
 			50,
 			window.innerWidth / window.innerHeight,
 			0.1,
 			100,
 		);
-		this._renderer = new three__WEBPACK_IMPORTED_MODULE_5__.WebGLRenderer({
+		this._renderer = new three__WEBPACK_IMPORTED_MODULE_6__.WebGLRenderer({
 			antialias: true,
+			alpha: true,
 			multiviewStereo: true,
 		});
 		this._renderer.setPixelRatio(window.devicePixelRatio);
 		this._renderer.setSize(window.innerWidth, window.innerHeight);
-		this._renderer.outputEncoding = three__WEBPACK_IMPORTED_MODULE_5__.sRGBEncoding;
+		this._renderer.outputEncoding = three__WEBPACK_IMPORTED_MODULE_6__.sRGBEncoding;
 		this._renderer.xr.enabled = true;
 
 		this._camera.position.set(0, 1.7, 0);
@@ -2275,7 +2280,7 @@ class Core {
 	}
 
 	_setupControllers() {
-		const controllerModelFactory = new three_examples_jsm_webxr_XRControllerModelFactory__WEBPACK_IMPORTED_MODULE_4__.XRControllerModelFactory();
+		const controllerModelFactory = new three_examples_jsm_webxr_XRControllerModelFactory__WEBPACK_IMPORTED_MODULE_5__.XRControllerModelFactory();
 		const webxrManager = this._renderer.xr;
 		this._controllers = {};
 
@@ -2296,7 +2301,8 @@ class Core {
 				this._controllers[handedness] = {
 					targetRaySpace,
 					gripSpace,
-					gamepad: new gamepad_wrapper__WEBPACK_IMPORTED_MODULE_1__.GamepadWrapper(event.data.gamepad),
+					gamepad: new gamepad_wrapper__WEBPACK_IMPORTED_MODULE_2__.GamepadWrapper(event.data.gamepad),
+					model: controllerModel,
 				};
 			});
 
@@ -2308,7 +2314,7 @@ class Core {
 	}
 
 	_setupRenderLoop() {
-		const clock = new three__WEBPACK_IMPORTED_MODULE_5__.Clock();
+		const clock = new three__WEBPACK_IMPORTED_MODULE_6__.Clock();
 		const render = () => {
 			const delta = clock.getDelta();
 			const elapsedTime = clock.elapsedTime;
@@ -2346,6 +2352,14 @@ class Core {
 		return this._renderer.xr.isPresenting;
 	}
 
+	get arButton() {
+		return this._arButton;
+	}
+
+	get vrButton() {
+		return this._vrButton;
+	}
+
 	registerGameSystem(GameSystem) {
 		this._ecsyWorld.registerSystem(GameSystem);
 	}
@@ -2372,14 +2386,14 @@ class Core {
 
 	createEmptyGameObject() {
 		const ecsyEntity = this._ecsyWorld.createEntity();
-		const gameObject = new _GameObject__WEBPACK_IMPORTED_MODULE_0__.GameObject();
+		const gameObject = new _GameObject__WEBPACK_IMPORTED_MODULE_1__.GameObject();
 		gameObject.init(ecsyEntity);
 		return gameObject;
 	}
 
 	createGameObject(object3D) {
 		const ecsyEntity = this._ecsyWorld.createEntity();
-		const gameObject = new _GameObject__WEBPACK_IMPORTED_MODULE_0__.GameObject();
+		const gameObject = new _GameObject__WEBPACK_IMPORTED_MODULE_1__.GameObject();
 		this._scene.add(gameObject);
 		gameObject.init(ecsyEntity);
 		if (object3D) {
@@ -2629,6 +2643,386 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/elixr/src/utils/ARButton.js":
+/*!**************************************************!*\
+  !*** ./node_modules/elixr/src/utils/ARButton.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ARButton": () => (/* binding */ ARButton)
+/* harmony export */ });
+class ARButton {
+	static createButton(renderer, sessionInit = {}) {
+		const button = document.createElement('button');
+
+		function showStartAR(/*device*/) {
+			if (sessionInit.domOverlay === undefined) {
+				const overlay = document.createElement('div');
+				overlay.style.display = 'none';
+				document.body.appendChild(overlay);
+
+				const svg = document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					'svg',
+				);
+				svg.setAttribute('width', 38);
+				svg.setAttribute('height', 38);
+				svg.style.position = 'absolute';
+				svg.style.right = '20px';
+				svg.style.top = '20px';
+				svg.addEventListener('click', function () {
+					currentSession.end();
+				});
+				overlay.appendChild(svg);
+
+				const path = document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					'path',
+				);
+				path.setAttribute('d', 'M 12,12 L 28,28 M 28,12 12,28');
+				path.setAttribute('stroke', '#fff');
+				path.setAttribute('stroke-width', 2);
+				svg.appendChild(path);
+
+				if (sessionInit.optionalFeatures === undefined) {
+					sessionInit.optionalFeatures = [];
+				}
+
+				sessionInit.optionalFeatures.push('dom-overlay');
+				sessionInit.domOverlay = { root: overlay };
+			}
+
+			//
+
+			let currentSession = null;
+			let rendererAlpha = null;
+
+			async function onSessionStarted(session) {
+				rendererAlpha = renderer.alpha;
+				renderer.alpha = true;
+				session.addEventListener('end', onSessionEnded);
+
+				renderer.xr.setReferenceSpaceType('local');
+
+				await renderer.xr.setSession(session);
+
+				button.textContent = 'STOP AR';
+				sessionInit.domOverlay.root.style.display = '';
+
+				currentSession = session;
+			}
+
+			function onSessionEnded(/*event*/) {
+				renderer.alpha = rendererAlpha;
+				currentSession.removeEventListener('end', onSessionEnded);
+
+				button.textContent = 'START AR';
+				sessionInit.domOverlay.root.style.display = 'none';
+
+				currentSession = null;
+			}
+
+			//
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'START AR';
+
+			button.onmouseenter = function () {
+				button.style.opacity = '1.0';
+			};
+
+			button.onmouseleave = function () {
+				button.style.opacity = '0.5';
+			};
+
+			button.onclick = function () {
+				if (currentSession === null) {
+					navigator.xr
+						.requestSession('immersive-ar', sessionInit)
+						.then(onSessionStarted);
+				} else {
+					currentSession.end();
+				}
+			};
+		}
+
+		function disableButton() {
+			button.style.display = '';
+
+			button.style.cursor = 'auto';
+			button.style.left = 'calc(50% - 75px)';
+			button.style.width = '150px';
+
+			button.onmouseenter = null;
+			button.onmouseleave = null;
+
+			button.onclick = null;
+		}
+
+		function showARNotSupported() {
+			disableButton();
+
+			button.textContent = 'AR NOT SUPPORTED';
+		}
+
+		function showARNotAllowed(exception) {
+			disableButton();
+
+			console.warn(
+				'Exception when trying to call xr.isSessionSupported',
+				exception,
+			);
+
+			button.textContent = 'AR NOT ALLOWED';
+		}
+
+		function stylizeElement(element) {
+			element.style.position = 'absolute';
+			element.style.bottom = '20px';
+			element.style.padding = '12px 6px';
+			element.style.border = '1px solid #fff';
+			element.style.borderRadius = '4px';
+			element.style.background = 'rgba(0,0,0,0.1)';
+			element.style.color = '#fff';
+			element.style.font = 'normal 13px sans-serif';
+			element.style.textAlign = 'center';
+			element.style.opacity = '0.5';
+			element.style.outline = 'none';
+			element.style.zIndex = '999';
+		}
+
+		if ('xr' in navigator) {
+			button.id = 'ARButton';
+			button.style.display = 'none';
+
+			stylizeElement(button);
+
+			navigator.xr
+				.isSessionSupported('immersive-ar')
+				.then(function (supported) {
+					supported ? showStartAR() : showARNotSupported();
+				})
+				.catch(showARNotAllowed);
+
+			return button;
+		} else {
+			const message = document.createElement('a');
+
+			if (window.isSecureContext === false) {
+				message.href = document.location.href.replace(/^http:/, 'https:');
+				message.innerHTML = 'WEBXR NEEDS HTTPS'; // TODO Improve message
+			} else {
+				message.href = 'https://immersiveweb.dev/';
+				message.innerHTML = 'WEBXR NOT AVAILABLE';
+			}
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement(message);
+
+			return message;
+		}
+	}
+}
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/elixr/src/utils/VRButton.js":
+/*!**************************************************!*\
+  !*** ./node_modules/elixr/src/utils/VRButton.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "VRButton": () => (/* binding */ VRButton)
+/* harmony export */ });
+class VRButton {
+	static createButton(renderer) {
+		const button = document.createElement('button');
+
+		function showEnterVR(/*device*/) {
+			let currentSession = null;
+
+			async function onSessionStarted(session) {
+				session.addEventListener('end', onSessionEnded);
+
+				await renderer.xr.setSession(session);
+				button.textContent = 'EXIT VR';
+
+				currentSession = session;
+			}
+
+			function onSessionEnded(/*event*/) {
+				currentSession.removeEventListener('end', onSessionEnded);
+
+				button.textContent = 'ENTER VR';
+
+				currentSession = null;
+			}
+
+			//
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'ENTER VR';
+
+			button.onmouseenter = function () {
+				button.style.opacity = '1.0';
+			};
+
+			button.onmouseleave = function () {
+				button.style.opacity = '0.5';
+			};
+
+			button.onclick = function () {
+				if (currentSession === null) {
+					// WebXR's requestReferenceSpace only works if the corresponding feature
+					// was requested at session creation time. For simplicity, just ask for
+					// the interesting ones as optional features, but be aware that the
+					// requestReferenceSpace call will fail if it turns out to be unavailable.
+					// ('local' is always available for immersive sessions and doesn't need to
+					// be requested separately.)
+
+					const sessionInit = {
+						optionalFeatures: [
+							'local-floor',
+							'bounded-floor',
+							'hand-tracking',
+							'layers',
+						],
+					};
+					navigator.xr
+						.requestSession('immersive-vr', sessionInit)
+						.then(onSessionStarted);
+				} else {
+					currentSession.end();
+				}
+			};
+		}
+
+		function disableButton() {
+			button.style.display = '';
+
+			button.style.cursor = 'auto';
+			button.style.left = 'calc(50% - 75px)';
+			button.style.width = '150px';
+
+			button.onmouseenter = null;
+			button.onmouseleave = null;
+
+			button.onclick = null;
+		}
+
+		function showWebXRNotFound() {
+			disableButton();
+
+			button.textContent = 'VR NOT SUPPORTED';
+		}
+
+		function showVRNotAllowed(exception) {
+			disableButton();
+
+			console.warn(
+				'Exception when trying to call xr.isSessionSupported',
+				exception,
+			);
+
+			button.textContent = 'VR NOT ALLOWED';
+		}
+
+		function stylizeElement(element) {
+			element.style.position = 'absolute';
+			element.style.bottom = '20px';
+			element.style.padding = '12px 6px';
+			element.style.border = '1px solid #fff';
+			element.style.borderRadius = '4px';
+			element.style.background = 'rgba(0,0,0,0.1)';
+			element.style.color = '#fff';
+			element.style.font = 'normal 13px sans-serif';
+			element.style.textAlign = 'center';
+			element.style.opacity = '0.5';
+			element.style.outline = 'none';
+			element.style.zIndex = '999';
+		}
+
+		if ('xr' in navigator) {
+			button.id = 'VRButton';
+			button.style.display = 'none';
+
+			stylizeElement(button);
+
+			navigator.xr
+				.isSessionSupported('immersive-vr')
+				.then(function (supported) {
+					supported ? showEnterVR() : showWebXRNotFound();
+
+					if (supported && VRButton.xrSessionIsGranted) {
+						button.click();
+					}
+				})
+				.catch(showVRNotAllowed);
+
+			return button;
+		} else {
+			const message = document.createElement('a');
+
+			if (window.isSecureContext === false) {
+				message.href = document.location.href.replace(/^http:/, 'https:');
+				message.innerHTML = 'WEBXR NEEDS HTTPS'; // TODO Improve message
+			} else {
+				message.href = 'https://immersiveweb.dev/';
+				message.innerHTML = 'WEBXR NOT AVAILABLE';
+			}
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement(message);
+
+			return message;
+		}
+	}
+
+	static registerSessionGrantedListener() {
+		if ('xr' in navigator) {
+			// WebXRViewer (based on Firefox) has a bug where addEventListener
+			// throws a silent exception and aborts execution entirely.
+			if (/WebXRViewer\//i.test(navigator.userAgent)) return;
+
+			navigator.xr.addEventListener('sessiongranted', () => {
+				VRButton.xrSessionIsGranted = true;
+			});
+		}
+	}
+}
+
+VRButton.xrSessionIsGranted = false;
+
+VRButton.registerSessionGrantedListener();
+
+
+
+
+/***/ }),
+
 /***/ "./node_modules/gamepad-wrapper/lib/index.js":
 /*!***************************************************!*\
   !*** ./node_modules/gamepad-wrapper/lib/index.js ***!
@@ -2703,32 +3097,50 @@ class GamepadWrapper {
             return axisIdx;
         }
     }
+    getButtonValueByIndex(buttonIdx) {
+        return this._buttons[buttonIdx].currFrame.value;
+    }
     getButtonValue(buttonId) {
         const buttonIdx = this.getButtonIdx(buttonId);
-        return this._buttons[buttonIdx].currFrame.value;
+        return this.getButtonValueByIndex(buttonIdx);
+    }
+    getButtonByIndex(buttonIdx) {
+        return this._buttons[buttonIdx].currFrame.value > this._buttonPressValueMin;
     }
     getButton(buttonId) {
         const buttonIdx = this.getButtonIdx(buttonId);
-        return this._buttons[buttonIdx].currFrame.value > this._buttonPressValueMin;
+        return this.getButtonByIndex(buttonIdx);
     }
-    getButtonDown(buttonId) {
-        const buttonIdx = this.getButtonIdx(buttonId);
+    getButtonDownByIndex(buttonIdx) {
         return (this._buttons[buttonIdx].prevFrame.value <= this._buttonPressValueMin &&
             this._buttons[buttonIdx].currFrame.value > this._buttonPressValueMin);
     }
-    getButtonUp(buttonId) {
+    getButtonDown(buttonId) {
         const buttonIdx = this.getButtonIdx(buttonId);
+        return this.getButtonDownByIndex(buttonIdx);
+    }
+    getButtonUpByIndex(buttonIdx) {
         return (this._buttons[buttonIdx].prevFrame.value >= this._buttonPressValueMax &&
             this._buttons[buttonIdx].currFrame.value < this._buttonPressValueMax);
     }
-    getButtonClick(buttonId) {
+    getButtonUp(buttonId) {
         const buttonIdx = this.getButtonIdx(buttonId);
+        return this.getButtonByIndex(buttonIdx);
+    }
+    getButtonClickByIndex(buttonIdx) {
         return (this._buttons[buttonIdx].prevFrame.value <= this._buttonClickThreshold &&
             this._buttons[buttonIdx].currFrame.value > this._buttonClickThreshold);
     }
+    getButtonClick(buttonId) {
+        const buttonIdx = this.getButtonIdx(buttonId);
+        return this.getButtonClickByIndex(buttonIdx);
+    }
+    getAxisByIndex(axisIdx) {
+        return this._gamepad.axes[axisIdx];
+    }
     getAxis(axisId) {
         const axisIdx = this.getAxisIdx(axisId);
-        return this._gamepad.axes[axisIdx];
+        return this.getAxisByIndex(axisIdx);
     }
     get2DInputAngle(buttonId) {
         const axisX = this.getAxis(buttonId + '_X');
@@ -2893,342 +3305,444 @@ exports.XR_STANDARD_AXES_MAPPING = {
 
 /***/ }),
 
-/***/ "./src/js/JoystickMovementSystem.js":
-/*!******************************************!*\
-  !*** ./src/js/JoystickMovementSystem.js ***!
-  \******************************************/
+/***/ "./src/js/EraseToolSystem.js":
+/*!***********************************!*\
+  !*** ./src/js/EraseToolSystem.js ***!
+  \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "JoystickMovementSystem": () => (/* binding */ JoystickMovementSystem)
+/* harmony export */   "EraseToolSystem": () => (/* binding */ EraseToolSystem)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+/* harmony import */ var _components_LineComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/LineComponent */ "./src/js/components/LineComponent.js");
+/* harmony import */ var _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/MultiToolComponent */ "./src/js/components/MultiToolComponent.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
 
 
 
 
 
 
-const MAX_MOVEMENT_SPEED = 1;
 
-class JoystickMovementSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem {
-	update(delta, _time) {
-		if (!this.core.controllers['left']) return;
-		/**
-		 * @type {import('gamepad-wrapper').GamepadWrapper}
-		 */
-		const gamepad = this.core.controllers['left'].gamepad;
-		const xValue = gamepad.getAxis(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.AXES.XR_STANDARD.THUMBSTICK_X);
-		const yValue = gamepad.getAxis(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.AXES.XR_STANDARD.THUMBSTICK_Y);
-		const inputValue = gamepad.get2DInputValue(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.THUMBSTICK);
-		const camera = this.core.renderer.xr.getCamera();
-		const direction = new three__WEBPACK_IMPORTED_MODULE_2__.Vector3(xValue, 0, yValue).applyQuaternion(
-			camera.getWorldQuaternion(new three__WEBPACK_IMPORTED_MODULE_2__.Quaternion()),
-		);
-		direction.y = 0;
-		this.core.playerSpace.position.add(
-			direction
-				.normalize()
-				.multiplyScalar(MAX_MOVEMENT_SPEED * delta * inputValue),
-		);
+class EraseToolSystem extends elixr__WEBPACK_IMPORTED_MODULE_3__.XRGameSystem {
+	update() {
+		const primaryController = this.core.controllers['right'];
+		if (!primaryController || !primaryController.gamepad.gamepad.buttons[7])
+			return;
+
+		this.queryGameObjects('multiTool').forEach((gameObject) => {
+			const multiToolComponent = gameObject.getMutableComponent(
+				_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent,
+			);
+
+			multiToolComponent.eraser.visible =
+				multiToolComponent.mode == _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.MODES.ERASE;
+
+			if (!multiToolComponent.eraser.visible) return;
+
+			if (
+				primaryController.gamepad.getButtonDown(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.BUTTON_1)
+			) {
+				let sizeIndex = _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.ERASER_SIZES.indexOf(
+					multiToolComponent.eraserSize,
+				);
+				sizeIndex = (sizeIndex + 1) % _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.ERASER_SIZES.length;
+				multiToolComponent.eraserSize =
+					_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.ERASER_SIZES[sizeIndex];
+				multiToolComponent.eraser.scale.setScalar(
+					multiToolComponent.eraserSize /
+						multiToolComponent.eraser.userData.baseSize,
+				);
+			}
+
+			const pressure = primaryController.gamepad.getButtonValueByIndex(7);
+			if (pressure > 0.02) {
+				const currentPoint = multiToolComponent.tip.getWorldPosition(
+					new three__WEBPACK_IMPORTED_MODULE_4__.Vector3(),
+				);
+				const tempVec = new three__WEBPACK_IMPORTED_MODULE_4__.Vector3();
+				this.queryGameObjects('lines').forEach((gameObject) => {
+					const lineComponent = gameObject.getComponent(_components_LineComponent__WEBPACK_IMPORTED_MODULE_1__.LineComponent);
+					if (lineComponent.boundingBox3.containsPoint(currentPoint)) {
+						const lineMesh = gameObject.children[0];
+						for (let i = 0; i < lineMesh.geometry.drawRange.count; i++) {
+							const positions = lineMesh.geometry.attributes.position.array;
+							tempVec.x = positions[i * 3];
+							tempVec.y = positions[i * 3 + 1];
+							tempVec.z = positions[i * 3 + 2];
+							if (
+								currentPoint.distanceTo(tempVec) <=
+								multiToolComponent.eraserSize
+							) {
+								gameObject.destroy();
+								break;
+							}
+						}
+					}
+				});
+			}
+		});
 	}
 }
+
+EraseToolSystem.queries = {
+	multiTool: { components: [_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent] },
+	lines: { components: [_components_LineComponent__WEBPACK_IMPORTED_MODULE_1__.LineComponent] },
+};
 
 
 /***/ }),
 
-/***/ "./src/js/SceneCreationSystem.js":
+/***/ "./src/js/MultiToolAnimationSystem.js":
+/*!********************************************!*\
+  !*** ./src/js/MultiToolAnimationSystem.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MultiToolAnimationSystem": () => (/* binding */ MultiToolAnimationSystem)
+/* harmony export */ });
+/* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
+/* harmony import */ var _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/MultiToolComponent */ "./src/js/components/MultiToolComponent.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+
+
+
+
+
+class MultiToolAnimationSystem extends elixr__WEBPACK_IMPORTED_MODULE_2__.XRGameSystem {
+	update() {
+		const primaryController = this.core.controllers['right'];
+		if (!primaryController) return;
+
+		this.queryGameObjects('multiTool').forEach((gameObject) => {
+			const multiToolComponent = gameObject.getMutableComponent(
+				_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_1__.MultiToolComponent,
+			);
+
+			if (
+				primaryController.gamepad.getButtonDown(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.BUTTON_2)
+			) {
+				multiToolComponent.mode = 1 - multiToolComponent.mode;
+			}
+
+			multiToolComponent.button.position.lerpVectors(
+				multiToolComponent.button.userData.minVec,
+				multiToolComponent.button.userData.maxVec,
+				primaryController.gamepad.getButtonValue(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.BUTTON_1),
+			);
+
+			multiToolComponent.stick.position.lerpVectors(
+				multiToolComponent.stick.userData.minVec,
+				multiToolComponent.stick.userData.maxVec,
+				(primaryController.gamepad.getAxis(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.AXES.XR_STANDARD.THUMBSTICK_X) + 1) /
+					2,
+			);
+		});
+	}
+}
+
+MultiToolAnimationSystem.queries = {
+	multiTool: { components: [_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_1__.MultiToolComponent] },
+};
+
+
+/***/ }),
+
+/***/ "./src/js/MultiToolInitSystem.js":
 /*!***************************************!*\
-  !*** ./src/js/SceneCreationSystem.js ***!
+  !*** ./src/js/MultiToolInitSystem.js ***!
   \***************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SceneCreationSystem": () => (/* binding */ SceneCreationSystem)
+/* harmony export */   "MultiToolInitSystem": () => (/* binding */ MultiToolInitSystem)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var three_examples_jsm_geometries_BoxLineGeometry__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/examples/jsm/geometries/BoxLineGeometry */ "./node_modules/three/examples/jsm/geometries/BoxLineGeometry.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three_examples_jsm_loaders_GLTFLoader__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/examples/jsm/loaders/GLTFLoader */ "./node_modules/three/examples/jsm/loaders/GLTFLoader.js");
 /* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+/* harmony import */ var _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/MultiToolComponent */ "./src/js/components/MultiToolComponent.js");
 
 
 
 
 
-class SceneCreationSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.SingleUseGameSystem {
+
+class MultiToolInitSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.GameSystem {
+	init() {
+		this.assetLoaded = false;
+		this.multiToolGameObject = null;
+	}
+
 	update() {
-		const room = new three__WEBPACK_IMPORTED_MODULE_2__.LineSegments(
-			new three_examples_jsm_geometries_BoxLineGeometry__WEBPACK_IMPORTED_MODULE_0__.BoxLineGeometry(6, 6, 6, 10, 10, 10),
-			new three__WEBPACK_IMPORTED_MODULE_2__.LineBasicMaterial({ color: 0x808080 }),
-		);
-		room.geometry.translate(0, 3, 0);
-		this.core.scene.add(room);
-		this.core.scene.background = new three__WEBPACK_IMPORTED_MODULE_2__.Color(0x505050);
+		if (!this.assetLoaded) {
+			new three_examples_jsm_loaders_GLTFLoader__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader().load(
+				// resource URL
+				'assets/pen.glb',
+				// called when the resource is loaded
+				(gltf) => {
+					const rootObject = gltf.scene.children[0];
+					const color = _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.COLORS[0];
+					const eraserSize = _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.ERASER_SIZES[0];
+					const tip = rootObject.getObjectByName('tip');
+					tip.material = new three__WEBPACK_IMPORTED_MODULE_3__.MeshBasicMaterial({ color });
+					const colorIndicator = rootObject.getObjectByName('color_indicator');
+					colorIndicator.material = tip.material;
+					const button = rootObject.getObjectByName('button');
+					button.userData.minVec = rootObject.getObjectByName(
+						'button_min',
+					).position;
+					button.userData.maxVec = rootObject.getObjectByName(
+						'button_max',
+					).position;
 
-		const ambientLight = new three__WEBPACK_IMPORTED_MODULE_2__.AmbientLight(0xffffff, 0.2);
-		this.core.scene.add(ambientLight);
+					const stick = rootObject.getObjectByName('stick');
+					stick.userData.minVec = rootObject.getObjectByName(
+						'stick_min',
+					).position;
+					stick.userData.maxVec = rootObject.getObjectByName(
+						'stick_max',
+					).position;
+					const eraser = new three__WEBPACK_IMPORTED_MODULE_3__.Mesh(
+						new three__WEBPACK_IMPORTED_MODULE_3__.SphereGeometry(eraserSize, 8, 6),
+						new three__WEBPACK_IMPORTED_MODULE_3__.MeshBasicMaterial({ color: 0xffffff }),
+					);
+					eraser.position.copy(tip.position);
+					eraser.userData.baseSize = eraserSize;
+					rootObject.add(eraser);
+					this.multiToolGameObject = this.core.createGameObject(rootObject);
+					this.multiToolGameObject.addComponent(_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent, {
+						tip,
+						eraser,
+						colorIndicator,
+						button,
+						stick,
+						mode: _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.MODES.PAINT,
+						color,
+						eraserSize,
+					});
+				},
+			);
+			this.assetLoaded = true;
+		}
 
-		const directionalLight = new three__WEBPACK_IMPORTED_MODULE_2__.DirectionalLight(0xffffff, 0.2);
-		this.core.scene.add(directionalLight);
+		const primaryController = this.core.controllers['right'];
+		if (primaryController && this.multiToolGameObject) {
+			primaryController.gripSpace.add(this.multiToolGameObject);
+			primaryController.model.visible = false;
+			this.stop();
+		}
 	}
 }
 
 
 /***/ }),
 
-/***/ "./src/js/SnapTurnSystem.js":
-/*!**********************************!*\
-  !*** ./src/js/SnapTurnSystem.js ***!
-  \**********************************/
+/***/ "./src/js/PaintToolSystem.js":
+/*!***********************************!*\
+  !*** ./src/js/PaintToolSystem.js ***!
+  \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SnapTurnSystem": () => (/* binding */ SnapTurnSystem)
+/* harmony export */   "PaintToolSystem": () => (/* binding */ PaintToolSystem)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+/* harmony import */ var _components_LineComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/LineComponent */ "./src/js/components/LineComponent.js");
+/* harmony import */ var _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/MultiToolComponent */ "./src/js/components/MultiToolComponent.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
 
 
 
 
 
-const LOCOMOTION_CONSTANTS = {
-	SNAP_TURN_ANGLE_MIN: (Math.PI / 180) * 45,
-	SNAP_TURN_ANGLE_MAX: (Math.PI / 180) * 135,
-	SNAP_TURN_VALUE_MIN: 0.95,
-	SNAP_TURN_LEFT_QUAT: new three__WEBPACK_IMPORTED_MODULE_2__.Quaternion(0, 0.3826834, 0, 0.9238795),
-	SNAP_TURN_RIGHT_QUAT: new three__WEBPACK_IMPORTED_MODULE_2__.Quaternion(0, -0.3826834, 0, 0.9238795),
-	TELEPORT_ANGLE_MIN: (Math.PI / 180) * 135,
-	TELEPORT_ANGLE_MAX: (Math.PI / 180) * 180,
-	TELEPORT_VALUE_MIN: 0.95,
-	JOYSTICK_STATE: {
-		DISENGAGED: 0,
-		LEFT: 1,
-		RIGHT: 2,
-		BACK: 3,
-	},
-	MOVEMENT_SPEED: 2.0,
-};
 
-class SnapTurnSystem extends elixr__WEBPACK_IMPORTED_MODULE_1__.XRGameSystem {
-	init() {
-		this.prevState = LOCOMOTION_CONSTANTS.JOYSTICK_STATE.DISENGAGED;
+
+const BUFFER_VEC = new three__WEBPACK_IMPORTED_MODULE_4__.Vector3(0.002, 0.002, 0.002);
+
+class PaintToolSystem extends elixr__WEBPACK_IMPORTED_MODULE_3__.XRGameSystem {
+	update() {
+		const primaryController = this.core.controllers['right'];
+		if (!primaryController || !primaryController.gamepad.gamepad.buttons[7])
+			return;
+
+		this.queryGameObjects('multiTool').forEach((gameObject) => {
+			const multiToolComponent = gameObject.getMutableComponent(
+				_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent,
+			);
+
+			multiToolComponent.tip.visible =
+				multiToolComponent.mode == _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.MODES.PAINT;
+
+			if (!multiToolComponent.tip.visible) return;
+
+			if (
+				primaryController.gamepad.getButtonDown(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.BUTTON_1)
+			) {
+				let colorIndex = _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.COLORS.indexOf(
+					multiToolComponent.color,
+				);
+				colorIndex = (colorIndex + 1) % _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.COLORS.length;
+				multiToolComponent.color = _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.COLORS[colorIndex];
+				multiToolComponent.tip.material.color.setHex(multiToolComponent.color);
+			}
+
+			const pressure = primaryController.gamepad.getButtonValueByIndex(7);
+			if (pressure > 0.02) {
+				const currentPoint = multiToolComponent.tip.getWorldPosition(
+					new three__WEBPACK_IMPORTED_MODULE_4__.Vector3(),
+				);
+				if (multiToolComponent.lastPoint) {
+					if (!multiToolComponent.currentLine) {
+						this._createNewLine(multiToolComponent);
+					}
+					this._updatePoints(multiToolComponent, currentPoint);
+				}
+				multiToolComponent.lastPoint = currentPoint;
+			} else {
+				multiToolComponent.currentLine = null;
+			}
+		});
 	}
 
-	update(_delta, _time) {
-		if (!this.core.controllers['right']) return;
-		/**
-		 * @type {import('gamepad-wrapper').GamepadWrapper}
-		 */
-		const gamepad = this.core.controllers['right'].gamepad;
-		const inputAngle = gamepad.get2DInputAngle(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.THUMBSTICK);
-		const inputValue = gamepad.get2DInputValue(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.THUMBSTICK);
-		let curState = LOCOMOTION_CONSTANTS.JOYSTICK_STATE.DISENGAGED;
+	_createNewLine(multiToolComponent) {
+		const geometry = new three__WEBPACK_IMPORTED_MODULE_4__.BufferGeometry();
+		const positions = new Float32Array(
+			_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.MAX_POINTS_PER_LINE * 3,
+		); // 3 vertices per point
+		geometry.setAttribute('position', new three__WEBPACK_IMPORTED_MODULE_4__.BufferAttribute(positions, 3));
+		geometry.setDrawRange(0, 0);
+		const material = multiToolComponent.tip.material.clone();
+		const lineMesh = new three__WEBPACK_IMPORTED_MODULE_4__.Line(geometry, material);
+		multiToolComponent.currentLine = this.core.createGameObject(lineMesh);
+		multiToolComponent.currentLine.addComponent(_components_LineComponent__WEBPACK_IMPORTED_MODULE_1__.LineComponent);
+		lineMesh.frustumCulled = false;
+	}
+
+	_updatePoints(multiToolComponent, newPoint) {
+		const lineMesh = multiToolComponent.currentLine.children[0];
+		const drawCount = lineMesh.geometry.drawRange.count;
+		if (drawCount >= _components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.MAX_POINTS_PER_LINE) {
+			this._createNewLine(multiToolComponent);
+		}
 
 		if (
-			Math.abs(inputAngle) > LOCOMOTION_CONSTANTS.SNAP_TURN_ANGLE_MIN &&
-			Math.abs(inputAngle) <= LOCOMOTION_CONSTANTS.SNAP_TURN_ANGLE_MAX &&
-			inputValue >= LOCOMOTION_CONSTANTS.SNAP_TURN_VALUE_MIN
+			newPoint.distanceTo(multiToolComponent.lastPoint) >=
+			_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent.POINTS_MIN_DISTANCE
 		) {
-			if (inputAngle > 0) {
-				curState = LOCOMOTION_CONSTANTS.JOYSTICK_STATE.RIGHT;
+			const lineComponent = multiToolComponent.currentLine.getMutableComponent(
+				_components_LineComponent__WEBPACK_IMPORTED_MODULE_1__.LineComponent,
+			);
+			if (!lineComponent.boundingBox3) {
+				lineComponent.boundingBox3 = new three__WEBPACK_IMPORTED_MODULE_4__.Box3(
+					newPoint.clone(),
+					newPoint.clone(),
+				);
 			} else {
-				curState = LOCOMOTION_CONSTANTS.JOYSTICK_STATE.LEFT;
-			}
-		}
-		if (this.prevState == LOCOMOTION_CONSTANTS.JOYSTICK_STATE.DISENGAGED) {
-			if (curState == LOCOMOTION_CONSTANTS.JOYSTICK_STATE.RIGHT) {
-				this.core.playerSpace.quaternion.multiply(
-					LOCOMOTION_CONSTANTS.SNAP_TURN_RIGHT_QUAT,
+				lineComponent.boundingBox3.expandByPoint(
+					new three__WEBPACK_IMPORTED_MODULE_4__.Vector3().addVectors(newPoint, BUFFER_VEC),
 				);
-			} else if (curState == LOCOMOTION_CONSTANTS.JOYSTICK_STATE.LEFT) {
-				this.core.playerSpace.quaternion.multiply(
-					LOCOMOTION_CONSTANTS.SNAP_TURN_LEFT_QUAT,
+				lineComponent.boundingBox3.expandByPoint(
+					new three__WEBPACK_IMPORTED_MODULE_4__.Vector3().subVectors(newPoint, BUFFER_VEC),
 				);
 			}
+			const positions = lineMesh.geometry.attributes.position.array;
+			let index = lineMesh.geometry.drawRange.count * 3;
+			positions[index++] = newPoint.x;
+			positions[index++] = newPoint.y;
+			positions[index++] = newPoint.z;
+			lineMesh.geometry.attributes.position.needsUpdate = true;
+			lineMesh.geometry.setDrawRange(0, drawCount + 1);
 		}
-		this.prevState = curState;
 	}
 }
+
+PaintToolSystem.queries = {
+	multiTool: { components: [_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_2__.MultiToolComponent] },
+};
 
 
 /***/ }),
 
-/***/ "./src/js/object-manipulation/InterativeObjectComponent.js":
-/*!*****************************************************************!*\
-  !*** ./src/js/object-manipulation/InterativeObjectComponent.js ***!
-  \*****************************************************************/
+/***/ "./src/js/components/LineComponent.js":
+/*!********************************************!*\
+  !*** ./src/js/components/LineComponent.js ***!
+  \********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "InteractiveObjectComponent": () => (/* binding */ InteractiveObjectComponent)
+/* harmony export */   "LineComponent": () => (/* binding */ LineComponent)
 /* harmony export */ });
 /* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
 
 
-class InteractiveObjectComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
+class LineComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
 
-InteractiveObjectComponent.schema = {
-	attachedController: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref, default: undefined },
+LineComponent.schema = {
+	boundingBox3: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
 };
 
 
 /***/ }),
 
-/***/ "./src/js/object-manipulation/ObjectManipulationSystem.js":
-/*!****************************************************************!*\
-  !*** ./src/js/object-manipulation/ObjectManipulationSystem.js ***!
-  \****************************************************************/
+/***/ "./src/js/components/MultiToolComponent.js":
+/*!*************************************************!*\
+  !*** ./src/js/components/MultiToolComponent.js ***!
+  \*************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ObjectManipulationSystem": () => (/* binding */ ObjectManipulationSystem)
+/* harmony export */   "MultiToolComponent": () => (/* binding */ MultiToolComponent)
 /* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
-/* harmony import */ var _InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./InterativeObjectComponent */ "./src/js/object-manipulation/InterativeObjectComponent.js");
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
 
 
+class MultiToolComponent extends elixr__WEBPACK_IMPORTED_MODULE_0__.GameComponent {}
 
-
-
-
-class ObjectManipulationSystem extends elixr__WEBPACK_IMPORTED_MODULE_2__.XRGameSystem {
-	update(_delta, _time) {
-		this.queryGameObjects('interactiveObjects').forEach((gameObject) => {
-			const interactiveObjectComponent = gameObject.getMutableComponent(
-				_InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__.InteractiveObjectComponent,
-			);
-			if (interactiveObjectComponent.attachedController) {
-				const gamepad = interactiveObjectComponent.attachedController.gamepad;
-				if (!gamepad.getButton(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER)) {
-					this.core.scene.attach(gameObject);
-					interactiveObjectComponent.attachedController = null;
-
-					console.log('detach');
-				}
-			} else {
-				let highlightController = null;
-				Object.values(this.core.controllers).forEach((controller) => {
-					const targetRaySpace = controller.targetRaySpace;
-					const gamepad = controller.gamepad;
-					const distance = gameObject
-						.getWorldPosition(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3())
-						.distanceTo(targetRaySpace.getWorldPosition(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3()));
-					if (distance < 0.1) {
-						highlightController = controller;
-						if (gamepad.getButtonDown(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER)) {
-							interactiveObjectComponent.attachedController = controller;
-							targetRaySpace.attach(gameObject);
-							highlightController = null;
-						}
-					}
-				});
-
-				if (highlightController) {
-					gameObject.children[0].material.color.setHex(0xfff000);
-				} else {
-					gameObject.children[0].material.color.setHex(0xffffff);
-				}
-			}
-		});
-	}
-}
-
-ObjectManipulationSystem.queries = {
-	interactiveObjects: { components: [_InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__.InteractiveObjectComponent] },
+MultiToolComponent.MODES = {
+	PAINT: 0,
+	ERASE: 1,
 };
 
+MultiToolComponent.COLORS = [
+	0xffffff,
+	0xff1616,
+	0xff914d,
+	0xffde59,
+	0x7ed957,
+	0x5271ff,
+	0x8c52ff,
+	0x7f00ff,
+	0x000000,
+];
 
-/***/ }),
+MultiToolComponent.ERASER_SIZES = [0.002, 0.004, 0.008];
 
-/***/ "./src/js/object-manipulation/ObjectPrototypeWallSystem.js":
-/*!*****************************************************************!*\
-  !*** ./src/js/object-manipulation/ObjectPrototypeWallSystem.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+MultiToolComponent.MAX_POINTS_PER_LINE = 5000;
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ObjectPrototypeWallSystem": () => (/* binding */ ObjectPrototypeWallSystem)
-/* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-/* harmony import */ var gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! gamepad-wrapper */ "./node_modules/gamepad-wrapper/lib/index.js");
-/* harmony import */ var _InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./InterativeObjectComponent */ "./src/js/object-manipulation/InterativeObjectComponent.js");
-/* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
+MultiToolComponent.POINTS_MIN_DISTANCE = 0.001;
 
-
-
-
-
-
-class ObjectPrototypeWallSystem extends elixr__WEBPACK_IMPORTED_MODULE_2__.XRGameSystem {
-	init() {
-		const cubePrototype = new three__WEBPACK_IMPORTED_MODULE_3__.Mesh(
-			new three__WEBPACK_IMPORTED_MODULE_3__.BoxGeometry(0.2, 0.2, 0.2),
-			new three__WEBPACK_IMPORTED_MODULE_3__.MeshStandardMaterial({ color: 0xffffff }),
-		);
-		cubePrototype.position.set(-0.3, 1.7, -1);
-		this.core.scene.add(cubePrototype);
-
-		const spherePrototype = new three__WEBPACK_IMPORTED_MODULE_3__.Mesh(
-			new three__WEBPACK_IMPORTED_MODULE_3__.SphereGeometry(0.1, 32, 16),
-			new three__WEBPACK_IMPORTED_MODULE_3__.MeshStandardMaterial({ color: 0xffffff }),
-		);
-		spherePrototype.position.set(0, 1.7, -1);
-		this.core.scene.add(spherePrototype);
-
-		const conePrototype = new three__WEBPACK_IMPORTED_MODULE_3__.Mesh(
-			new three__WEBPACK_IMPORTED_MODULE_3__.ConeGeometry(0.1, 0.2, 32),
-			new three__WEBPACK_IMPORTED_MODULE_3__.MeshStandardMaterial({ color: 0xffffff }),
-		);
-		conePrototype.position.set(0.3, 1.7, -1);
-		this.core.scene.add(conePrototype);
-
-		this._prototypeObjects = [cubePrototype, spherePrototype, conePrototype];
-	}
-
-	update() {
-		this._prototypeObjects.forEach((prototypeObject) => {
-			let highlightController = null;
-			Object.values(this.core.controllers).forEach((controller) => {
-				const targetRaySpace = controller.targetRaySpace;
-				const gamepad = controller.gamepad;
-				const distance = prototypeObject
-					.getWorldPosition(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3())
-					.distanceTo(targetRaySpace.getWorldPosition(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3()));
-				if (distance < 0.1) {
-					highlightController = controller;
-					if (gamepad.getButtonDown(gamepad_wrapper__WEBPACK_IMPORTED_MODULE_0__.BUTTONS.XR_STANDARD.TRIGGER)) {
-						const object = prototypeObject.clone();
-						object.material = new three__WEBPACK_IMPORTED_MODULE_3__.MeshStandardMaterial({
-							color: 0xffffff,
-						});
-						targetRaySpace.attach(object);
-						const gameObject = this.core.createGameObject(object);
-						gameObject.addComponent(_InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__.InteractiveObjectComponent, {
-							attachedController: controller,
-						});
-					}
-				}
-			});
-
-			if (highlightController) {
-				prototypeObject.material.color.setHex(0x4c8bf5);
-			} else {
-				prototypeObject.material.color.setHex(0xffffff);
-			}
-		});
-	}
-}
+MultiToolComponent.schema = {
+	tip: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	eraser: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	colorIndicator: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	button: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	stick: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	mode: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Number },
+	color: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Number },
+	lastPoint: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	currentLine: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Ref },
+	eraserSize: { type: elixr__WEBPACK_IMPORTED_MODULE_0__.Types.Number },
+};
 
 
 /***/ }),
@@ -57626,87 +58140,6 @@ if ( typeof window !== 'undefined' ) {
 
 /***/ }),
 
-/***/ "./node_modules/three/examples/jsm/geometries/BoxLineGeometry.js":
-/*!***********************************************************************!*\
-  !*** ./node_modules/three/examples/jsm/geometries/BoxLineGeometry.js ***!
-  \***********************************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "BoxLineGeometry": () => (/* binding */ BoxLineGeometry)
-/* harmony export */ });
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
-
-
-class BoxLineGeometry extends three__WEBPACK_IMPORTED_MODULE_0__.BufferGeometry {
-
-	constructor( width = 1, height = 1, depth = 1, widthSegments = 1, heightSegments = 1, depthSegments = 1 ) {
-
-		super();
-
-		widthSegments = Math.floor( widthSegments );
-		heightSegments = Math.floor( heightSegments );
-		depthSegments = Math.floor( depthSegments );
-
-		const widthHalf = width / 2;
-		const heightHalf = height / 2;
-		const depthHalf = depth / 2;
-
-		const segmentWidth = width / widthSegments;
-		const segmentHeight = height / heightSegments;
-		const segmentDepth = depth / depthSegments;
-
-		const vertices = [];
-
-		let x = - widthHalf;
-		let y = - heightHalf;
-		let z = - depthHalf;
-
-		for ( let i = 0; i <= widthSegments; i ++ ) {
-
-			vertices.push( x, - heightHalf, - depthHalf, x, heightHalf, - depthHalf );
-			vertices.push( x, heightHalf, - depthHalf, x, heightHalf, depthHalf );
-			vertices.push( x, heightHalf, depthHalf, x, - heightHalf, depthHalf );
-			vertices.push( x, - heightHalf, depthHalf, x, - heightHalf, - depthHalf );
-
-			x += segmentWidth;
-
-		}
-
-		for ( let i = 0; i <= heightSegments; i ++ ) {
-
-			vertices.push( - widthHalf, y, - depthHalf, widthHalf, y, - depthHalf );
-			vertices.push( widthHalf, y, - depthHalf, widthHalf, y, depthHalf );
-			vertices.push( widthHalf, y, depthHalf, - widthHalf, y, depthHalf );
-			vertices.push( - widthHalf, y, depthHalf, - widthHalf, y, - depthHalf );
-
-			y += segmentHeight;
-
-		}
-
-		for ( let i = 0; i <= depthSegments; i ++ ) {
-
-			vertices.push( - widthHalf, - heightHalf, z, - widthHalf, heightHalf, z );
-			vertices.push( - widthHalf, heightHalf, z, widthHalf, heightHalf, z );
-			vertices.push( widthHalf, heightHalf, z, widthHalf, - heightHalf, z );
-			vertices.push( widthHalf, - heightHalf, z, - widthHalf, - heightHalf, z );
-
-			z += segmentDepth;
-
-		}
-
-		this.setAttribute( 'position', new three__WEBPACK_IMPORTED_MODULE_0__.Float32BufferAttribute( vertices, 3 ) );
-
-	}
-
-}
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/three/examples/jsm/libs/motion-controllers.module.js":
 /*!***************************************************************************!*\
   !*** ./node_modules/three/examples/jsm/libs/motion-controllers.module.js ***!
@@ -62528,227 +62961,6 @@ function toTrianglesDrawMode( geometry, drawMode ) {
 
 /***/ }),
 
-/***/ "./node_modules/three/examples/jsm/webxr/VRButton.js":
-/*!***********************************************************!*\
-  !*** ./node_modules/three/examples/jsm/webxr/VRButton.js ***!
-  \***********************************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "VRButton": () => (/* binding */ VRButton)
-/* harmony export */ });
-class VRButton {
-
-	static createButton( renderer, options ) {
-
-		if ( options ) {
-
-			console.error( 'THREE.VRButton: The "options" parameter has been removed. Please set the reference space type via renderer.xr.setReferenceSpaceType() instead.' );
-
-		}
-
-		const button = document.createElement( 'button' );
-
-		function showEnterVR( /*device*/ ) {
-
-			let currentSession = null;
-
-			async function onSessionStarted( session ) {
-
-				session.addEventListener( 'end', onSessionEnded );
-
-				await renderer.xr.setSession( session );
-				button.textContent = 'EXIT VR';
-
-				currentSession = session;
-
-			}
-
-			function onSessionEnded( /*event*/ ) {
-
-				currentSession.removeEventListener( 'end', onSessionEnded );
-
-				button.textContent = 'ENTER VR';
-
-				currentSession = null;
-
-			}
-
-			//
-
-			button.style.display = '';
-
-			button.style.cursor = 'pointer';
-			button.style.left = 'calc(50% - 50px)';
-			button.style.width = '100px';
-
-			button.textContent = 'ENTER VR';
-
-			button.onmouseenter = function () {
-
-				button.style.opacity = '1.0';
-
-			};
-
-			button.onmouseleave = function () {
-
-				button.style.opacity = '0.5';
-
-			};
-
-			button.onclick = function () {
-
-				if ( currentSession === null ) {
-
-					// WebXR's requestReferenceSpace only works if the corresponding feature
-					// was requested at session creation time. For simplicity, just ask for
-					// the interesting ones as optional features, but be aware that the
-					// requestReferenceSpace call will fail if it turns out to be unavailable.
-					// ('local' is always available for immersive sessions and doesn't need to
-					// be requested separately.)
-
-					const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
-					navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
-
-				} else {
-
-					currentSession.end();
-
-				}
-
-			};
-
-		}
-
-		function disableButton() {
-
-			button.style.display = '';
-
-			button.style.cursor = 'auto';
-			button.style.left = 'calc(50% - 75px)';
-			button.style.width = '150px';
-
-			button.onmouseenter = null;
-			button.onmouseleave = null;
-
-			button.onclick = null;
-
-		}
-
-		function showWebXRNotFound() {
-
-			disableButton();
-
-			button.textContent = 'VR NOT SUPPORTED';
-
-		}
-
-		function showVRNotAllowed( exception ) {
-
-			disableButton();
-
-			console.warn( 'Exception when trying to call xr.isSessionSupported', exception );
-
-			button.textContent = 'VR NOT ALLOWED';
-
-		}
-
-		function stylizeElement( element ) {
-
-			element.style.position = 'absolute';
-			element.style.bottom = '20px';
-			element.style.padding = '12px 6px';
-			element.style.border = '1px solid #fff';
-			element.style.borderRadius = '4px';
-			element.style.background = 'rgba(0,0,0,0.1)';
-			element.style.color = '#fff';
-			element.style.font = 'normal 13px sans-serif';
-			element.style.textAlign = 'center';
-			element.style.opacity = '0.5';
-			element.style.outline = 'none';
-			element.style.zIndex = '999';
-
-		}
-
-		if ( 'xr' in navigator ) {
-
-			button.id = 'VRButton';
-			button.style.display = 'none';
-
-			stylizeElement( button );
-
-			navigator.xr.isSessionSupported( 'immersive-vr' ).then( function ( supported ) {
-
-				supported ? showEnterVR() : showWebXRNotFound();
-
-				if ( supported && VRButton.xrSessionIsGranted ) {
-
-					button.click();
-
-				}
-
-			} ).catch( showVRNotAllowed );
-
-			return button;
-
-		} else {
-
-			const message = document.createElement( 'a' );
-
-			if ( window.isSecureContext === false ) {
-
-				message.href = document.location.href.replace( /^http:/, 'https:' );
-				message.innerHTML = 'WEBXR NEEDS HTTPS'; // TODO Improve message
-
-			} else {
-
-				message.href = 'https://immersiveweb.dev/';
-				message.innerHTML = 'WEBXR NOT AVAILABLE';
-
-			}
-
-			message.style.left = 'calc(50% - 90px)';
-			message.style.width = '180px';
-			message.style.textDecoration = 'none';
-
-			stylizeElement( message );
-
-			return message;
-
-		}
-
-	}
-
-	static xrSessionIsGranted = false;
-
-	static registerSessionGrantedListener() {
-
-		if ( 'xr' in navigator ) {
-
-			// WebXRViewer (based on Firefox) has a bug where addEventListener
-			// throws a silent exception and aborts execution entirely.
-			if ( /WebXRViewer\//i.test( navigator.userAgent ) ) return;
-
-			navigator.xr.addEventListener( 'sessiongranted', () => {
-
-				VRButton.xrSessionIsGranted = true;
-
-			} );
-
-		}
-
-	}
-
-}
-
-VRButton.registerSessionGrantedListener();
-
-
-
-
-/***/ }),
-
 /***/ "./node_modules/three/examples/jsm/webxr/XRControllerModelFactory.js":
 /*!***************************************************************************!*\
   !*** ./node_modules/three/examples/jsm/webxr/XRControllerModelFactory.js ***!
@@ -63122,12 +63334,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var three_mesh_bvh__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! three-mesh-bvh */ "./node_modules/three-mesh-bvh/src/utils/ExtensionUtilities.js");
 /* harmony import */ var elixr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! elixr */ "./node_modules/elixr/src/index.js");
-/* harmony import */ var _js_object_manipulation_InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./js/object-manipulation/InterativeObjectComponent */ "./src/js/object-manipulation/InterativeObjectComponent.js");
-/* harmony import */ var _js_JoystickMovementSystem__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./js/JoystickMovementSystem */ "./src/js/JoystickMovementSystem.js");
-/* harmony import */ var _js_object_manipulation_ObjectManipulationSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./js/object-manipulation/ObjectManipulationSystem */ "./src/js/object-manipulation/ObjectManipulationSystem.js");
-/* harmony import */ var _js_object_manipulation_ObjectPrototypeWallSystem__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./js/object-manipulation/ObjectPrototypeWallSystem */ "./src/js/object-manipulation/ObjectPrototypeWallSystem.js");
-/* harmony import */ var _js_SceneCreationSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./js/SceneCreationSystem */ "./src/js/SceneCreationSystem.js");
-/* harmony import */ var _js_SnapTurnSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./js/SnapTurnSystem */ "./src/js/SnapTurnSystem.js");
+/* harmony import */ var _js_EraseToolSystem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./js/EraseToolSystem */ "./src/js/EraseToolSystem.js");
+/* harmony import */ var _js_components_LineComponent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./js/components/LineComponent */ "./src/js/components/LineComponent.js");
+/* harmony import */ var _js_MultiToolAnimationSystem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./js/MultiToolAnimationSystem */ "./src/js/MultiToolAnimationSystem.js");
+/* harmony import */ var _js_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./js/components/MultiToolComponent */ "./src/js/components/MultiToolComponent.js");
+/* harmony import */ var _js_MultiToolInitSystem__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./js/MultiToolInitSystem */ "./src/js/MultiToolInitSystem.js");
+/* harmony import */ var _js_PaintToolSystem__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./js/PaintToolSystem */ "./src/js/PaintToolSystem.js");
 
 
 
@@ -63145,15 +63357,22 @@ three__WEBPACK_IMPORTED_MODULE_7__.BufferGeometry.prototype.computeBoundsTree = 
 three__WEBPACK_IMPORTED_MODULE_7__.BufferGeometry.prototype.disposeBoundsTree = three_mesh_bvh__WEBPACK_IMPORTED_MODULE_8__.disposeBoundsTree;
 three__WEBPACK_IMPORTED_MODULE_7__.Mesh.prototype.raycast = three_mesh_bvh__WEBPACK_IMPORTED_MODULE_8__.acceleratedRaycast;
 
-const core = new elixr__WEBPACK_IMPORTED_MODULE_0__.Core(document.getElementById('scene-container'));
+const core = new elixr__WEBPACK_IMPORTED_MODULE_0__.Core(document.getElementById('scene-container'), {}, true);
 
-core.registerGameSystem(_js_SceneCreationSystem__WEBPACK_IMPORTED_MODULE_5__.SceneCreationSystem);
-core.registerGameSystem(_js_JoystickMovementSystem__WEBPACK_IMPORTED_MODULE_2__.JoystickMovementSystem);
-core.registerGameSystem(_js_SnapTurnSystem__WEBPACK_IMPORTED_MODULE_6__.SnapTurnSystem);
+const ambientLight = new three__WEBPACK_IMPORTED_MODULE_7__.AmbientLight(0xffffff, 1);
+core.scene.add(ambientLight);
 
-core.registerGameComponent(_js_object_manipulation_InterativeObjectComponent__WEBPACK_IMPORTED_MODULE_1__.InteractiveObjectComponent);
-core.registerGameSystem(_js_object_manipulation_ObjectPrototypeWallSystem__WEBPACK_IMPORTED_MODULE_4__.ObjectPrototypeWallSystem);
-core.registerGameSystem(_js_object_manipulation_ObjectManipulationSystem__WEBPACK_IMPORTED_MODULE_3__.ObjectManipulationSystem);
+const directionalLight = new three__WEBPACK_IMPORTED_MODULE_7__.DirectionalLight(0xffffff, 1);
+core.scene.add(directionalLight);
+
+core.registerGameComponent(_js_components_MultiToolComponent__WEBPACK_IMPORTED_MODULE_4__.MultiToolComponent);
+core.registerGameComponent(_js_components_LineComponent__WEBPACK_IMPORTED_MODULE_2__.LineComponent);
+core.registerGameSystem(_js_MultiToolInitSystem__WEBPACK_IMPORTED_MODULE_5__.MultiToolInitSystem);
+core.registerGameSystem(_js_MultiToolAnimationSystem__WEBPACK_IMPORTED_MODULE_3__.MultiToolAnimationSystem);
+core.registerGameSystem(_js_PaintToolSystem__WEBPACK_IMPORTED_MODULE_6__.PaintToolSystem);
+core.registerGameSystem(_js_EraseToolSystem__WEBPACK_IMPORTED_MODULE_1__.EraseToolSystem);
+// document.body.append(core.vrButton);
+document.body.append(core.arButton);
 
 })();
 
